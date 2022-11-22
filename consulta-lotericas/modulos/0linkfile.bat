@@ -14,10 +14,14 @@ REM mklink /h "C:\xampp\htdocs-hostnames\AdbControlApp\adb_node\DeviceFarmer\adb
 
 REM ....TS....
 
+REM - appPU -- Add Jlink 
+REM MD "%DESTINO%\appPU"
+mklink /j "%DESTINO%\appPU\" "D:\xampp\htdocs-hostnames\puppeteer_nodejs\0ModuloPuppeteer\mdofc\"
+pause
 
-REM - appPU -- 
+REM - appPU -- Add Hlink 
 MD "%DESTINO%\appPU"
-mklink /h "%DESTINO%\appPU\f.puppeteer.ts" "D:\xampp\htdocs-hostnames\puppeteer_nodejs\0ModuloPuppeteer\f.puppeteer.ts"
+mklink /h "%DESTINO%\appPU\f.puppeteer.ts" "D:\xampp\htdocs-hostnames\puppeteer_nodejs\0ModuloPuppeteer\mdofc\f.puppeteer.ts"
 pause
 
 REM REM -- appApiProxy
