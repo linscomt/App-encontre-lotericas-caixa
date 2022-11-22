@@ -3,15 +3,6 @@
 set DESTINO=D:\xampp\htdocs-hostnames\puppeteer_nodejs\ProjetosApp\linscomt\App-encontre-lotericas-caixa\consulta-lotericas\modulos
 CD %DESTINO%
 
-REM PATH - - mklink /j "destino/path" "origem/path"
-REM mklink /j "C:\xampp\htdocs-hostnames\AdbControlApp\adb_node\DeviceFarmer\adbkit-teste01\modulos\appReq" "C:\xampp\htdocs-hostnames\nodejs\MyModulos\js\appReq"
-
-
-REM FILE - - mklink /h "destino/file" "origem/file"
-REM mklink /h "C:\xampp\htdocs-hostnames\AdbControlApp\adb_node\DeviceFarmer\adbkit-teste02\src\modulos\appReq\rEquest.ts" "C:\xampp\htdocs-hostnames\nodejs\MyModulos\ts\appReq\rEquest.ts"
-
-
-
 REM ....TS....
 
 REM - appPU -- Add Jlink 
