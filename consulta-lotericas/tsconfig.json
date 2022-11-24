@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "target": "ES2017",
+    "moduleResolution": "node",
+    "sourceMap": false,
+    "outDir": "0BuildApp/dist",
+	  "removeComments": true,
+    "resolveJsonModule": true,
+	  "noEmitOnError": false
+  },
+  
+  "lib": ["ES2017"],
+  "exclude": [
+    "node_modules"
+  ]
+  //,"files": ["./src/global.var.d.ts"]
+}
+
+
+  
