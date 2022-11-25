@@ -8,10 +8,11 @@ import {write_file, write_fileA} from '../modulos/appMod/writefile';
 import {read_file, checkFileExists, read_fileStream} from '../modulos/appMod/readfile';
 import Looger from '../modulos/appMod/looger.out';const looger= new Looger('App start Busca Loterica','0');
 import * as FPuppeteer from '../modulos/appPU/f.puppeteer';
-
-    
 import Urls from "../urls.json";
-import { exit } from 'process';
+
+import {OutListaF1,OutListaF2} from './app.const';
+
+
 
 async function AP_CriarPU(PU, FPuppeteer, DATAPROXY, AgentUSER){
     /**/
@@ -48,10 +49,18 @@ async function LTcx_SelectLOTERICA(page){
     document.querySelector("#ctl00_ctl59_g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036_ddlTipo > option:nth-child(3)")
 
 */
-    return 'Lotéricas';
+    let selectOptionLT='div[class="form form-d form-vertical"] div[class="select-button"] select[name="ctl00$ctl59$g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036$ddlTipo"][id="ctl00_ctl59_g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036_ddlTipo"]';
+    //<option value="2">Lotéricas</option>
+    try{
+        await page.select(selectOptionLT, '2');
+        await looger.consoleEINFO('SELECIONOU LOTERICA');
+        return true;
+    }catch(e){}
+    return false;
+    
 }
 
-async function LTcx_SelectESTADO(ESt){
+async function LTcx_SelectESTADO(page,ESt, sName=''){
 /*    
     <select name="ctl00$ctl59$g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036$ddlUf" id="ctl00_ctl59_g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036_ddlUf" class="select-d" style="opacity: 0;">
 	    <option value="">UF</option>
@@ -62,31 +71,90 @@ async function LTcx_SelectESTADO(ESt){
 	    <option value="TO">Tocantins</option>
     </select>
 */
-    return true;
+    let selectOptionES = 'div[class="form form-d form-vertical"] div[class="select-button"] select[name="ctl00$ctl59$g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036$ddlUf"][id="ctl00_ctl59_g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036_ddlUf"]';
+    try{
+        let CLoop1=0;
+        while(true){
+            await FPuppeteer.OptionSelect(page, selectOptionES, ESt, sName);
+            await Funcoes.wsleep(1);
+            
+            let CLoop=0;
+            while(true){
+                let RWLoop = await FPuppeteer.WAITLoopB(page, ['div[id="loading"][style="display: block;"]'], 2);
+                if(await RWLoop.result == false){
+                    await looger.consoleEINFO('SELECIONOU ESTADO', 'sUF');
+                    return true;
+                }
+                if(CLoop > 3){
+                    break;
+                }else CLoop++;
+            }
+
+            if(CLoop1 > 1){
+                return false;
+            }else CLoop1++;
+        }
+
+        //let sUF=await FPuppeteer.GetTextObjHTML(page, selectOptionES);
+        //await FPuppeteer.OptionselectB(page, selectOptionES, ESt);
+        //return true;
+    }catch(e){}
+    return false;
 }
 
 async function LTcx_GetListaCidades(page){
-    let Listas=[];
-    let L=await FPuppeteer.GetSrcObjHtml(page,
-        'select[name="ctl00$ctl59$g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036$ddlCidade"][id="ctl00_ctl59_g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036_ddlCidade"][class="select-d"]'
-    ) as any;
+    /*
+    <select name="ctl00$ctl59$g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036$ddlCidade" id="ctl00_ctl59_g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036_ddlCidade" disabled="disabled" class="aspNetDisabled select-d" style="opacity: 0;">
+    						<option selected="selected" value="">Cidade</option>
+
+    					</select>
+    */
+
+    let selectOptionCD = 'div[class="form form-d form-vertical"] div[class="select-button"] select[name="ctl00$ctl59$g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036$ddlCidade"][id="ctl00_ctl59_g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036_ddlCidade"]';
     
-    if(L.includes('<option value="')){
-        L=L.split('<option value="');
-        //console.log('L:',L);
-        await L.forEach(element => {
-            if(element!='' && !element.includes('Cidade') ){
-                let s1=element.substring(0,element.indexOf('">'));
-                let s2=element.substring(element.indexOf('">')+2, element.indexOf('</'));
-                //console.log({s1,s2});
-                Listas.push({value:s1,cidade:s2});
-            }
-        });
+    let CLoop=0;
+    let Listas=[];
+    let L:any;
+
+    while(true){
+        
+        L=await FPuppeteer.GetSrcObjHtml(page,
+            selectOptionCD
+        );
+        //await looger.consoleEINFO('LTcx_GetListaCidades-L:', L, '|');
+        if(L==='<option selected="selected" value="">Cidade</option>'){
+            await looger.consoleEINFO('SEM LISTA CIDADES');
+        }
+        else{
+            await looger.consoleEINFO('LISTA de CIDADES');
+            break;
+        }
+
+        if(CLoop > 2){
+            return [];
+        }else{ CLoop++; await Funcoes.wsleep(1000);}
     }
+    
+
+    try {
+        if(L.includes('<option value="')){
+            L=L.split('<option value="');
+            //console.log('L:',L);
+            await L.forEach(element => {
+                if(element!='' && !element.includes('Cidade') ){
+                    let s1=element.substring(0,element.indexOf('">'));
+                    let s2=element.substring(element.indexOf('">')+2, element.indexOf('</'));
+                    //console.log({s1,s2});
+                    Listas.push({value:s1,cidade:s2});
+                }
+            });
+        }
+    } catch (error) {}
     return Listas;
+    
 }
 
-async function LTcx_SelectCIDADE(Value, Cidade){
+async function LTcx_SelectCIDADE(page, Value, Cidade){
 /*    
     <select name="ctl00$ctl59$g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036$ddlCidade" id="ctl00_ctl59_g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036_ddlCidade" class="select-d" style="opacity: 0;">
 	    <option value="0">Cidade</option>
@@ -99,13 +167,31 @@ async function LTcx_SelectCIDADE(Value, Cidade){
 	    <option value="1151">XIQUE-XIQUE</option>
     </select>
 */
+    let selectOptionCD = 'div[class="form form-d form-vertical"] div[class="select-button"] select[name="ctl00$ctl59$g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036$ddlCidade"][id="ctl00_ctl59_g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036_ddlCidade"]';
+    return await FPuppeteer.OptionSelect(page, selectOptionCD, Value, Cidade);
+}
+
+async function LTcx_BuscaCDLotericas(page){
+    let btBuscar='input[name="ctl00$ctl59$g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036$btnBuscar"][value="Buscar"][id="ctl00_ctl59_g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036_btnBuscar"]';
+    await FPuppeteer.Click(page, btBuscar);
     return true;
 }
 
 async function LTcx_BuscaLotericas(page){
-    let btBuscar='input[name="ctl00$ctl59$g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036$btnBuscar"][value="Buscar"][id="ctl00_ctl59_g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036_btnBuscar"]';
-    await FPuppeteer.Click(page, btBuscar);
-    return true;
+    
+    let btBuscar='';
+
+    btBuscar='input[name="ctl00$ctl59$g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036$txtCNPJ"][id="txtCNPJ"]';
+    if(await FPuppeteer.Click(page, btBuscar)===true)
+        return true;
+
+    btBuscar='input[name="ctl00$ctl59$g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036$btnBuscar"][value="Buscar"][id="ctl00_ctl59_g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036_btnBuscar"]';
+    if(await FPuppeteer.Click(page, btBuscar)===true)
+        return true;        
+    //div[id="ctl00_ctl59_g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036_pnlCNPJ"]
+	//div[class="separator"]
+    
+    return false;
 }
 
 async function LTcx_VerMaisLotericas(page){
@@ -186,21 +272,19 @@ async function LTcx_SalvarLotericas(data, E){
     await limpar(Endereco.message.trim())+"\n"+
     'RzS:'+
     await limpar(RazaoSocial.message.trim());
-    
-    
 
-    await write_file('./ListaLT_01'+E+'.txt', 
+    await write_file(OutListaF1 +E+'.txt', 
         FMT+"\n---------------------------------------------------\n"
     );
 
     FMT=FMT.replace(/\n/g,'|');
-    await write_file('./ListaLT_02'+E+'.txt', 
+    await write_file(OutListaF2 +E+'.txt', 
        FMT+"\n"
     );
     return true;
 }
 
-export async function ConsultarLT(ESt, iPs, FL_PsJAFOI){
+export async function ConsultarLT(ESt, iPs){
 return new Promise(async resolve => {
     /**-/
     let tm = Funcoes.randomIntFromInterval(2,7);
@@ -220,7 +304,19 @@ return new Promise(async resolve => {
     /**/
 
     /*-CHAMAR URL-*/
-    let PG=await AP_setURL(PU, FPuppeteer, Urls.paginaBuscaLotericasT);
+    let CPG=0;
+    while(true){
+        if(await AP_setURL(PU, FPuppeteer, Urls.paginaBuscaLotericas)!==false){
+            break;
+        }
+        if(CPG >10){resolve({result:false, ESt, iPs, s_message:'#NAOCARREGOU#'});return;}
+        CPG++;
+        await looger.consoleEINFO('NAO CARREGOU', CPG);
+        await Funcoes.wsleep(1000);
+    }
+    
+
+    
     /**/
 
     /*--*/
@@ -233,17 +329,26 @@ return new Promise(async resolve => {
     await write_fileA('./HTML3-code.html',srcHTML);
     /*--*/
     
+    await LTcx_SelectESTADO(PU.page, ESt);
 
+    let ListaCD = await LTcx_GetListaCidades(PU.page);
+    console.log(ListaCD);
+
+    await LTcx_SelectCIDADE(PU.page ,ListaCD[0].value, ListaCD[0].cidade);
+
+    //await LTcx_BuscaCDLotericas(PU.page);
+    await LTcx_BuscaLotericas(PU.page);
+    return;
 
 
     /*--*/
-    if(await LTcx_SelectESTADO(ESt)){
+    if(await LTcx_SelectESTADO(PU.page, ESt)){
         let ListaCD = await LTcx_GetListaCidades(PU.page);
         
         for (let index = 0; index < ListaCD.length; index++) {
             const element = ListaCD[index];
             
-            await LTcx_SelectCIDADE(element.value, element.cidade);
+            await LTcx_SelectCIDADE(PU.page , element.value, element.cidade);
             await LTcx_BuscaLotericas(PU.page);
             
             /**/
