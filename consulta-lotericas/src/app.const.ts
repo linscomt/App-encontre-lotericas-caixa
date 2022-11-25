@@ -14,7 +14,7 @@ export const FL_PsJAFOI='./'+PathListas+'/jafoiPs.log';
 export const OutListaF1 = './' + PathListas + '/' + ArquivoLista + 'F1.';
 export const OutListaF2 = './' + PathListas + '/' + ArquivoLista + 'F2.';
 
-export const TEmpMemCD = './' + PathListas + '/tempCD';
+export const TEmpMemCD = './' + PathListas + '/temp/tempCD';
 
     //
 export const MAXTH=1;

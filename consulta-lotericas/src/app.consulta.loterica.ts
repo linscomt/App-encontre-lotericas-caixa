@@ -448,22 +448,11 @@ return new Promise(async resolve => {
         
         for (let index = 0; index < ListaCD.length; index++) {
             const element = ListaCD[index];
+            if(PU===undefined){
+                break;
+            }
             
-            if(element!==undefined && parseInt(element.value) > parseInt(V_C[0]) ){
-
-            
-                let CLoopLD1=10;
-                while(true){
-                    if(await LaodingPG(PU.page)==true)break;
-                    if(CLoopLD1 <= 0){
-                        break;
-                    }else CLoopLD1--;
-                }if(CLoopLD1 <= 0){
-                    await write_fileA(TEmpMemCD+ESt+'.log', element.value);
-                    ConsultarLT(ESt, iPs);
-                    resolve({result:false, ESt, iPs, s_message:'LOADING...'});
-                    return;
-                }
+            if(element!==undefined && parseInt(element.value) > parseInt(V_C) ){//747
 
                 await LTcx_SelectCIDADE(PU.page , element.value, element.cidade);
 
@@ -471,10 +460,32 @@ return new Promise(async resolve => {
                 while(true){
                     await LTcx_BuscaLotericas(PU.page);
                     ListaLT=await LTcx_ListarLotericas(PU.page);
-                    if(ListaLT.length > 0)break;
-                    await looger.consoleINFO('NO LISTA', element.value);
+                    if(ListaLT.length > 0){
+                        await looger.consoleINFO('VL-CD', element.value, V_C);
+                        break;
+                    }
+                    await looger.consoleINFO('NO LISTA', element.value, V_C);
                     if(await NenhumPonto(PU.page)===true)break;
                     await Funcoes.wsleep(1000);
+                }
+
+
+                let CLoopLD1=7;
+                while(true){
+                    await looger.consoleEINFO('LaodingPG-LOADING...', CLoopLD1);
+                    if(await LaodingPG(PU.page)==true)break;
+                    if(CLoopLD1 <= 0){
+                        break;
+                    }else CLoopLD1--;
+
+                }if(CLoopLD1 <= 0){
+                    await looger.consoleEINFO('RESTART...', CLoopLD1);
+                    //let parseInt(element.value)-1;
+                    await write_fileA(TEmpMemCD+ESt+'.log', element.value);
+                    resolve({result:true, ESt, iPs, s_message:'LOADING...'});
+                    await FPuppeteer.Destroi(PU);
+                    ConsultarLT(ESt, iPs);
+                    return;
                 }
 
                 
