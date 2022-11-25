@@ -7,6 +7,6 @@ exports.FL_JAFOI = './' + exports.PathListas + '/jafoi.log';
 exports.FL_PsJAFOI = './' + exports.PathListas + '/jafoiPs.log';
 exports.OutListaF1 = './' + exports.PathListas + '/' + exports.ArquivoLista + 'F1.';
 exports.OutListaF2 = './' + exports.PathListas + '/' + exports.ArquivoLista + 'F2.';
-exports.TEmpMemCD = './' + exports.PathListas + '/tempCD';
+exports.TEmpMemCD = './' + exports.PathListas + '/temp/tempCD';
 exports.MAXTH = 1;
 exports.TMLOW = 2000;

@@ -282,9 +282,27 @@ async function ConsultarLT(ESt, iPs) {
             let OLDLocal = '';
             for (let index = 0; index < ListaCD.length; index++) {
                 const element = ListaCD[index];
-                if (element !== undefined && parseInt(element.value) > parseInt(V_C[0])) {
-                    let CLoopLD1 = 10;
+                if (PU === undefined) {
+                    break;
+                }
+                if (element !== undefined && parseInt(element.value) > parseInt(V_C)) {
+                    await LTcx_SelectCIDADE(PU.page, element.value, element.cidade);
+                    let ListaLT = [];
                     while (true) {
+                        await LTcx_BuscaLotericas(PU.page);
+                        ListaLT = await LTcx_ListarLotericas(PU.page);
+                        if (ListaLT.length > 0) {
+                            await looger.consoleINFO('VL-CD', element.value, V_C);
+                            break;
+                        }
+                        await looger.consoleINFO('NO LISTA', element.value, V_C);
+                        if (await NenhumPonto(PU.page) === true)
+                            break;
+                        await Funcoes.wsleep(1000);
+                    }
+                    let CLoopLD1 = 7;
+                    while (true) {
+                        await looger.consoleEINFO('LaodingPG-LOADING...', CLoopLD1);
                         if (await LaodingPG(PU.page) == true)
                             break;
                         if (CLoopLD1 <= 0) {
@@ -294,22 +312,13 @@ async function ConsultarLT(ESt, iPs) {
                             CLoopLD1--;
                     }
                     if (CLoopLD1 <= 0) {
-                        await (0, writefile_1.write_fileA)(app_const_1.TEmpMemCD + ESt + '.log', element.value);
+                        await looger.consoleEINFO('RESTART...', CLoopLD1);
+                        let Antes = (parseInt(element.value) - 1).toString();
+                        await (0, writefile_1.write_fileA)(app_const_1.TEmpMemCD + ESt + '.log', Antes);
+                        resolve({ result: true, ESt, iPs, s_message: 'LOADING...' });
+                        await FPuppeteer.Destroi(PU);
                         ConsultarLT(ESt, iPs);
-                        resolve({ result: false, ESt, iPs, s_message: 'LOADING...' });
                         return;
-                    }
-                    await LTcx_SelectCIDADE(PU.page, element.value, element.cidade);
-                    let ListaLT = [];
-                    while (true) {
-                        await LTcx_BuscaLotericas(PU.page);
-                        ListaLT = await LTcx_ListarLotericas(PU.page);
-                        if (ListaLT.length > 0)
-                            break;
-                        await looger.consoleINFO('NO LISTA', element.value);
-                        if (await NenhumPonto(PU.page) === true)
-                            break;
-                        await Funcoes.wsleep(1000);
                     }
                     if (ListaLT.length > 0) {
                         while (true) {
