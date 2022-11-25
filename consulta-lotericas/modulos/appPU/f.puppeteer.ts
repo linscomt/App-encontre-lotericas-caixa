@@ -621,7 +621,7 @@ export async function MouseMoveClick(page, Selector){
  * @returns 
  */
 export async function Click(page, element){
-	try{await page.click(element);await page.waitForTimeout(1000);return true;}catch(e){return false;}
+	try{let C=await page.click(element);/**-/await looger.consoleINFO('Click',C);/**/await page.waitForTimeout(1000);return true;}catch(e){return false;}
 }
 
 /**
@@ -640,6 +640,22 @@ export async function XPath_Click(page, element){
 	}
 	return false;
 }
+
+/**
+ * 
+ * @param page 
+ * @param Selector 
+ * @returns 
+ */
+export async function ClickB(page, Selector){
+	try{	
+		return await page.evaluate((selector: string) => {
+			(<HTMLInputElement>document.querySelector(selector)).click();
+			return true;
+		},Selector);
+	}catch(e){return false;}
+}
+
     
 export async function OptionSelect(page, Selector, sValue, sName){
 	try {

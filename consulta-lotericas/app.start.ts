@@ -9,7 +9,7 @@ import {read_file, checkFileExists, read_fileStream} from './modulos/appMod/read
 import Looger from './modulos/appMod/looger.out';const looger= new Looger('App start Busca Loterica','0');
 
 import {ConsultarLT} from './src/app.consulta.loterica';
-import {FL_PsJAFOI, MAXTH} from './src/app.const';
+import {FL_JAFOI, FL_PsJAFOI, MAXTH} from './src/app.const';
 
 
 import Urls from "./urls.json";
@@ -28,12 +28,14 @@ export var UEST:any;
     await looger.consoleLog(`APP[IN-START]: ${process.memoryUsage().rss / 1024 / 1024} MiB`);
     
     /*--*/
-    
     let FLPsJAFOI = await read_file(FL_PsJAFOI);
     if(FLPsJAFOI!=false && FLPsJAFOI!=''){
         iPosicao=parseInt(FLPsJAFOI as string);
     }
     /**/
+    let JAFOIEST= await read_file(FL_JAFOI)as any;
+    if(JAFOIEST==false) JAFOIEST='';       
+
     
     const MAXESTADOS=(Urls.Estados.length -1);
 
@@ -46,10 +48,15 @@ export var UEST:any;
     function set_check(iPs){
         if(Urls.Estados[iPs] !== undefined){
             UEST=Urls.Estados[iPs];
-            looger.consoleLog('TESTANDO ESTADO:',UEST);
-            TempCheck.push(
-                ConsultarLT(Urls.Estados[iPs], iPs)
-            );
+            if(JAFOIEST.includes(UEST)){
+
+            }
+            else{
+                looger.consoleLog('TESTANDO ESTADO:',UEST);
+                TempCheck.push(
+                    ConsultarLT(Urls.Estados[iPs], iPs)
+                );
+            }
             iPosicao++;
         }
     }
@@ -75,11 +82,12 @@ export var UEST:any;
 
     
 
-    /**/
-        ConsultarLT('RR', 0);
+    /**-/
+        ConsultarLT('AP', 1);
         return;
     /**/
 
+    
     while(true){
         
         
