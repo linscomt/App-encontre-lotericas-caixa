@@ -9,31 +9,18 @@ import {read_file, checkFileExists, read_fileStream} from './modulos/appMod/read
 import Looger from './modulos/appMod/looger.out';const looger= new Looger('App start Busca Loterica','0');
 
 import {ConsultarLT} from './src/app.consulta.loterica';
+import {FL_JAFOI, FL_PsJAFOI, MAXTH} from './src/app.const';
 
 
 import Urls from "./urls.json";
 import { exit } from 'process';
 
 
-/*Constantes*/
-    //Lista
-    const ArquivoLista='ListaLotericas.txt';//'DB.Lista.csv';
-    const PathListas='Listas';
-    const OUT_Lista='./'+PathListas+'/'+ArquivoLista;
-    //JaFoi
-    const FL_JAFOI='./'+PathListas+'/jafoi.log';
-    const FL_PsJAFOI='./'+PathListas+'/jafoiPs.log';
-
-    //
-    const MAXTH=3;
-    const TMLOW=2000;
-/**/    
-    
 /*Variaveis*/
-    var TempCheck=[];
-    var MxTh=0;
-    var iPosicao=0;
-    var UEST:any;
+export var TempCheck=[];
+export var MxTh=0;
+export var iPosicao=0;
+export var UEST:any;
 
 /**/
 
@@ -41,12 +28,14 @@ import { exit } from 'process';
     await looger.consoleLog(`APP[IN-START]: ${process.memoryUsage().rss / 1024 / 1024} MiB`);
     
     /*--*/
-    
     let FLPsJAFOI = await read_file(FL_PsJAFOI);
     if(FLPsJAFOI!=false && FLPsJAFOI!=''){
         iPosicao=parseInt(FLPsJAFOI as string);
     }
     /**/
+    let JAFOIEST= await read_file(FL_JAFOI)as any;
+    if(JAFOIEST==false) JAFOIEST='';       
+
     
     const MAXESTADOS=(Urls.Estados.length -1);
 
@@ -59,10 +48,15 @@ import { exit } from 'process';
     function set_check(iPs){
         if(Urls.Estados[iPs] !== undefined){
             UEST=Urls.Estados[iPs];
-            looger.consoleLog('TESTANDO ESTADO:',UEST);
-            TempCheck.push(
-                ConsultarLT(Urls.Estados[iPs], iPs, FL_JAFOI)
-            );
+            if(JAFOIEST.includes(UEST)){
+
+            }
+            else{
+                looger.consoleLog('TESTANDO ESTADO:',UEST);
+                TempCheck.push(
+                    ConsultarLT(Urls.Estados[iPs], iPs)
+                );
+            }
             iPosicao++;
         }
     }
@@ -88,11 +82,12 @@ import { exit } from 'process';
 
     
 
-    /**/
-        ConsultarLT('BA', 4, FL_PsJAFOI);
+    /**-/
+        ConsultarLT('AP', 1);
         return;
     /**/
 
+    
     while(true){
         
         

@@ -292,7 +292,7 @@ export async function GotoContents(Pagina){
 		try{console.log(await response);}catch(e){console.log('ERRO-GOTO:',e);}
 		return response;
 	} catch (error) {
-		console.log('ERROR-GOTO-PAGINA:',error);
+		//console.log('ERROR-GOTO-PAGINA:',error);
 		return false;
 	}
 }
@@ -621,7 +621,7 @@ export async function MouseMoveClick(page, Selector){
  * @returns 
  */
 export async function Click(page, element){
-	try{await page.click(element);await page.waitForTimeout(1000);return true;}catch(e){return false;}
+	try{let C=await page.click(element);/**-/await looger.consoleINFO('Click',C);/**/await page.waitForTimeout(1000);return true;}catch(e){return false;}
 }
 
 /**
@@ -640,7 +640,73 @@ export async function XPath_Click(page, element){
 	}
 	return false;
 }
+
+/**
+ * 
+ * @param page 
+ * @param Selector 
+ * @returns 
+ */
+export async function ClickB(page, Selector){
+	try{	
+		return await page.evaluate((selector: string) => {
+			(<HTMLInputElement>document.querySelector(selector)).click();
+			return true;
+		},Selector);
+	}catch(e){return false;}
+}
+
     
+export async function OptionSelect(page, Selector, sValue, sName){
+	try {
+		await Click(page, Selector);
+		await AppFunc.wsleep(100);
+		await page.keyboard.press('ArrowDown');
+		await page.keyboard.press('Enter');
+
+		await page.select(Selector, sValue);
+
+		if(sName !==''){
+			const selectElem = await page.$(Selector);
+			await selectElem.type(sName);
+		}
+
+		return true;
+	} catch (error) {}
+	return false;
+}
+
+async function OptionselectB(page, Selector, sValue){
+	let tag_element = await page.querySelector(Selector);
+	let options_text = await tag_element.querySelectorAllEval(
+		'option',
+		'options => options.map(option => option.value)'
+	);
+
+	if(options_text.includes(sValue))
+		await page.querySelectorEval(Selector, 'element => element.value = "{sValue}"');
+
+	return await page.querySelectorEval(Selector, 'element => element.value');
+
+
+}
+async function OptionselectByText(page, selector, value) {
+    return await page.evaluate(
+        (css, text) => {
+            let sel = document.querySelector(css)
+            for (let option of [...document.querySelectorAll(css + ' option')]) {
+                if (text === option.textContent) {
+                    sel.value = option.innerHTML
+                }
+            }
+
+            const event = new Event('change', { bubbles: true })
+            sel.dispatchEvent(event)
+        },
+        selector,
+        value,
+    )
+}
 
 
 export async function GetSrcObjHtml(page, selector){
