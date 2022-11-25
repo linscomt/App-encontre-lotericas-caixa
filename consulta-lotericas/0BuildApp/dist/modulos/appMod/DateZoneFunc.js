@@ -15,7 +15,7 @@ async function get_datezone(dateBefor, setzone = false) {
 }
 exports.get_datezone = get_datezone;
 var padLeft = function (base) {
-    if (base > 10)
+    if (base > 9)
         return base;
     else
         ;

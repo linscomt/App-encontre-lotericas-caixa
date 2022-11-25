@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.iNjectCookie = exports.fmtCookie = exports.getOption = exports.getAllCookie = exports.WAITVisible = exports.getiFrame = exports.load_iFrame = exports.setValueInputB = exports.setValueInputA = exports.GetValueObjInput = exports.GetTextObjHTML = exports.XPath_Click = exports.Click = exports.MouseMoveClick = exports.WAITLoopB = exports.Events_ONCE = exports.Events_ON = exports.SelectValue = exports.SelectSearchValue = exports.getObjCodeHtml = exports.CLEAR_input = exports.executeJavaScript = exports.Destroi = exports.WaitLoadForSelector = exports.GotoPagina = exports.GotoContents = exports.CriarPUU = void 0;
+exports.iNjectCookie = exports.fmtCookie = exports.getOption = exports.getAllCookie = exports.WAITVisible = exports.getiFrame = exports.load_iFrame = exports.setValueInputB = exports.setValueInputA = exports.GetValueObjInput = exports.GetTextObjHTML = exports.GetSrcObjHtml = exports.OptionSelect = exports.ClickB = exports.XPath_Click = exports.Click = exports.MouseMoveClick = exports.WAITLoopB = exports.Events_ONCE = exports.Events_ON = exports.SelectValue = exports.SelectSearchValue = exports.getLenHtml = exports.getObjCodeHtml = exports.get_TextHtmlPage = exports.CLEAR_input = exports.executeJavaScript = exports.Destroi = exports.WaitLoadForSelector = exports.GotoPagina = exports.GotoContents = exports.CriarPUU = void 0;
 require("dotenv/config");
 const os_1 = __importDefault(require("os"));
 const puppeteer_extra_1 = __importDefault(require("puppeteer-extra"));
@@ -177,7 +177,6 @@ async function GotoPagina(page, URLURI, timeout = 240000) {
         return response;
     }
     catch (error) {
-        console.log('ERROR-GOTO-PAGINA:', error);
         return false;
     }
 }
@@ -260,7 +259,7 @@ async function CLEAR_input(page, selector) {
     }
 }
 exports.CLEAR_input = CLEAR_input;
-async function get_codeHtml(lpage) {
+async function get_TextHtmlPage(lpage) {
     try {
         let html = await lpage.content();
         let $ = await cheerio.load(html);
@@ -271,17 +270,28 @@ async function get_codeHtml(lpage) {
         return false;
     }
 }
+exports.get_TextHtmlPage = get_TextHtmlPage;
 async function getObjCodeHtml(page, tag = 'html') {
     try {
         let html = await page.content();
         let $ = await cheerio.load(html);
-        return await $(tag);
+        return await $(tag).html();
     }
     catch (e) {
         return false;
     }
 }
 exports.getObjCodeHtml = getObjCodeHtml;
+async function getLenHtml(page) {
+    try {
+        let html = await page.content();
+        return html.length;
+    }
+    catch (e) {
+        return false;
+    }
+}
+exports.getLenHtml = getLenHtml;
 async function SelectSearchValue(page, Valor) {
     try {
         return await page.$$eval('option', options => { var _a; (_a = options.find(o => o.innerText === Valor)) === null || _a === void 0 ? void 0 : _a.value; });
@@ -401,7 +411,7 @@ async function MouseMoveClick(page, Selector) {
 exports.MouseMoveClick = MouseMoveClick;
 async function Click(page, element) {
     try {
-        await page.click(element);
+        let C = await page.click(element);
         await page.waitForTimeout(1000);
         return true;
     }
@@ -423,6 +433,65 @@ async function XPath_Click(page, element) {
     return false;
 }
 exports.XPath_Click = XPath_Click;
+async function ClickB(page, Selector) {
+    try {
+        return await page.evaluate((selector) => {
+            document.querySelector(selector).click();
+            return true;
+        }, Selector);
+    }
+    catch (e) {
+        return false;
+    }
+}
+exports.ClickB = ClickB;
+async function OptionSelect(page, Selector, sValue, sName) {
+    try {
+        await Click(page, Selector);
+        await AppFunc.wsleep(100);
+        await page.keyboard.press('ArrowDown');
+        await page.keyboard.press('Enter');
+        await page.select(Selector, sValue);
+        if (sName !== '') {
+            const selectElem = await page.$(Selector);
+            await selectElem.type(sName);
+        }
+        return true;
+    }
+    catch (error) { }
+    return false;
+}
+exports.OptionSelect = OptionSelect;
+async function OptionselectB(page, Selector, sValue) {
+    let tag_element = await page.querySelector(Selector);
+    let options_text = await tag_element.querySelectorAllEval('option', 'options => options.map(option => option.value)');
+    if (options_text.includes(sValue))
+        await page.querySelectorEval(Selector, 'element => element.value = "{sValue}"');
+    return await page.querySelectorEval(Selector, 'element => element.value');
+}
+async function OptionselectByText(page, selector, value) {
+    return await page.evaluate((css, text) => {
+        let sel = document.querySelector(css);
+        for (let option of [...document.querySelectorAll(css + ' option')]) {
+            if (text === option.textContent) {
+                sel.value = option.innerHTML;
+            }
+        }
+        const event = new Event('change', { bubbles: true });
+        sel.dispatchEvent(event);
+    }, selector, value);
+}
+async function GetSrcObjHtml(page, selector) {
+    try {
+        return await page.evaluate((selector) => {
+            return document.querySelector(selector).innerHTML.replace(/\t/g, '').replace(/\n/g, '').trim();
+        }, selector);
+    }
+    catch (e) {
+        return false;
+    }
+}
+exports.GetSrcObjHtml = GetSrcObjHtml;
 async function GetTextObjHTML(page, selector) {
     try {
         return await page.evaluate((selector) => {
@@ -571,7 +640,7 @@ async function renderPageToHtml(page) {
                 }
                 catch (e) {
                     console.log('renderPageToHtml');
-                    await (0, writefile_1.write_file)('./dados_pesquisados/ERROR_DADOS_.html', 'ERROR:#003:' + e + 'PAG:' + page);
+                    await (0, writefile_1.write_file)('./ERROR_DADOS_.html', 'ERROR:#003:' + e + 'PAG:' + page);
                 }
             }, res);
         }

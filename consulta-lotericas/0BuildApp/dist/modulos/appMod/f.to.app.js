@@ -84,7 +84,7 @@ async function setstrValue(Text, TextIN, index1, index2, value) {
     }
 }
 exports.setstrValue = setstrValue;
-async function getstrValue(Text, index1, index2, value) {
+async function getstrValue(Text, index1, index2, value = 1) {
     try {
         return {
             success: true,

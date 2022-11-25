@@ -53,6 +53,11 @@ class Logger {
             console.log(ANSI_PURPLE, result, `${ANSI_GREEN}[${this.luserid}]`, `${ANSI_CYAN}[${this.name}]`, `${ANSI_YELLOW}`, str, ANSI_WHITE, texto, ANSI_WHITE);
         });
     }
+    async consoleINFO_OK(str, ...texto) {
+        await DateZone.dateFMT().then(result => {
+            console.log(ANSI_PURPLE, result, `${ANSI_GREEN}[${this.luserid}]`, `${ANSI_CYAN}[${this.name}]`, `${ANSI_BLUE}`, str, ANSI_WHITE, texto, ANSI_WHITE);
+        });
+    }
     async consoleLog(str, ...texto) {
         if (process.env.CONSOLESHOW === "true")
             await DateZone.dateFMT().then(result => {

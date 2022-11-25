@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TMLOW = exports.MAXTH = exports.TEmpMemCD = exports.OutListaF2 = exports.OutListaF1 = exports.FL_PsJAFOI = exports.FL_JAFOI = exports.PathListas = exports.ArquivoLista = void 0;
+exports.ArquivoLista = 'ListaLotericas';
+exports.PathListas = 'Listas';
+exports.FL_JAFOI = './' + exports.PathListas + '/jafoi.log';
+exports.FL_PsJAFOI = './' + exports.PathListas + '/jafoiPs.log';
+exports.OutListaF1 = './' + exports.PathListas + '/' + exports.ArquivoLista + 'F1.';
+exports.OutListaF2 = './' + exports.PathListas + '/' + exports.ArquivoLista + 'F2.';
+exports.TEmpMemCD = './' + exports.PathListas + '/tempCD';
+exports.MAXTH = 1;
+exports.TMLOW = 2000;
