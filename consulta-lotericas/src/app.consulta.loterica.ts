@@ -480,8 +480,8 @@ return new Promise(async resolve => {
 
                 }if(CLoopLD1 <= 0){
                     await looger.consoleEINFO('RESTART...', CLoopLD1);
-                    //let parseInt(element.value)-1;
-                    await write_fileA(TEmpMemCD+ESt+'.log', element.value);
+                    let Antes=(parseInt(element.value)-1).toString();
+                    await write_fileA(TEmpMemCD+ESt+'.log', Antes);
                     resolve({result:true, ESt, iPs, s_message:'LOADING...'});
                     await FPuppeteer.Destroi(PU);
                     ConsultarLT(ESt, iPs);
