@@ -3,15 +3,12 @@
 /*-rEquest.ts-*/
 
 import Zlib from 'zlib';
-
 import request from 'request';
 //npm i @types/request
 //npm install --save-dev @types/request
 //npm install --save @types/request-promise
 //npm i --save @types/request-promise-native
-
 import fetch from 'node-fetch';
-
 import axios from 'axios';
 
 //import HttpsProxyAgent from 'https-proxy-agent';
@@ -19,6 +16,7 @@ import axios from 'axios';
 //import https from 'https';
 
 
+export var jar;
 /*
 import HttpsProxyAgent from 'https-proxy-agent';
 import * as HttpsProxyA from 'https-proxy-agent';
@@ -28,7 +26,7 @@ var options = {
 }			
 */
 export async function curl_axios(options){		 
-	return new Promise(async(resolve) => { 
+	return new Promise<{result: boolean, Header: any, response: string}>(async(resolve) => { 
 		await axios.request(options)
 		.then(async function (response) {
 			 //console.log('DATA-AXIOS:',response.data);
@@ -74,20 +72,29 @@ var options = {
 }
 */
 export async function curl_request(options) {
-    return new Promise(async resolve => 
+    return new Promise<{error:any, response:any, body:string}>(async resolve => 
 		request(options, (error, response, body) => 
 			resolve({ error, response, body })
 		));
 }
 export async function curl_Request(options) {
 	try{
-    	return new Promise(async resolve => 
+    	return new Promise<{result: boolean, Header: any, response: any, body:string, error?:any}>(async resolve =>{
+			await setJar(await request.jar());
+			options.jar = await getJar();
+			logCookies(await getJar());
+			//console.log('options:',options);
+			
 			request(options, (error, response, body) => {
-				let H:any;try{H=response.headers;}catch(error){H=''}											 
-				resolve({result: true, Header: H, response, body, error })
+				let H:any;try{H=response.headers;}catch(error){H=''}
+				let Error=(error!==undefined&&error!==null?error.toString():'');
+				resolve({result: true, Header: H, response, body, error: Error })
 			})
-		);
-	}catch(e){return {result: false, Header: '', response: 'ERROR#CURL_REQUEST:'+e,'body':''};}
+		});
+	}catch(e){
+		let Error=(e!==undefined&&e!==null?e.toString():'');
+		return {result: false, Header: '', response: 'ERROR#CURL_REQUEST:'+e,'body':'', error:Error };
+	}
 }
 
 
@@ -148,6 +155,32 @@ async function curl_request2(options:any){
 
 }
 
+export async function getJar() {
+	if(jar){
+		jar._jar.store.getAllCookies(function(err, cookieArray) {
+			if(err) throw new Error("Failed to get cookies");
+			//console.log('**1*** getAllCookies:',JSON.stringify(cookieArray, null, 4));
+		});
+		return jar;
+	}
+	else {
+	  jar = request.jar();
+	  jar._jar.store.getAllCookies(function(err, cookieArray) {
+        if(err) throw new Error("Failed to get cookies");
+        //console.log('**2*** getAllCookies:',JSON.stringify(cookieArray, null, 4));
+      });
+	  return jar;
+   }
+ }
+export async function setJar(jarParam) {
+	jar = jarParam;
+}
+function logCookies(jar){
+    jar._jar.store.getAllCookies(function(err, cookieArray) {
+        if(err) throw new Error("Failed to get cookies");
+        //console.log(JSON.stringify(cookieArray, null, 4));
+    });
+}
 
 /*
 > var URI = require("uri-js");

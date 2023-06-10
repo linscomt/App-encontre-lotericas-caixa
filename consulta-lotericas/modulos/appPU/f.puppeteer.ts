@@ -1,19 +1,35 @@
 /*
+f.puppeteer.ts
 */
 import 'dotenv/config';
 import os from "os";
-//import puppeteer from 'puppeteer';
 //import { Puppeteer } from 'puppeteer';
+
+//import puppeteer from 'puppeteer';
 import puppeteer from 'puppeteer-extra';
+
 import puppeteer_stealth from 'puppeteer-extra-plugin-stealth';
 import puppeteer_RecaptchaPlugin from 'puppeteer-extra-plugin-recaptcha';
 import {Cluster} from 'puppeteer-cluster';
+
+//"puppeteer-extra-plugin-adblocker": "^2.11.3",
+//"puppeteer-extra-plugin-anonymize-ua": "^2.2.8",
+//"puppeteer-extra-plugin-block-resources": "^2.2.4",
+//"puppeteer-screen-recorder": "^2.0.2",
+
+// ES6
+//import { PuppeteerScreenRecorder } from 'puppeteer-screen-recorder';
+
+
+//npm i @muraenateam/puppeteer-cluster
+import * as cheerio from 'cheerio';
+
 import Looger from '../appMod/looger.out';const looger= new Looger('Puppeteer','TS');
 
 
 //import antiCaptcha from '@antiadmin/anticaptchaofficial';
 
-
+import {start_teste} from './f.puppeteer.cluster.std';
 
 
 //import {createPageProxy} from 'puppeteer-proxy';
@@ -21,7 +37,7 @@ import Looger from '../appMod/looger.out';const looger= new Looger('Puppeteer','
 
 
 
-import {read_file} from '../appMod/readFile';
+import {read_file} from '../appMod/readfile';
 import {write_file} from '../appMod/writefile';
 import {get_newAgent} from '../appMod/UserAgent.to.app';
 import * as AppFunc from '../appMod/f.to.app';
@@ -29,7 +45,7 @@ import * as AppFunc from '../appMod/f.to.app';
 
 
 
-import * as cheerio from 'cheerio';
+
 //const lineReader = require('line-reader');
 
 //import * as ProxyEphemeral from '../apiProxy/ApiProxyEphemeral_NDFetch';
@@ -46,8 +62,11 @@ const TAMANHOJNH=(process.env.TMHJANELA!==undefined&&process.env.TMHJANELA!==''?
 const SHOWHIDEJANELA=(process.env.SHOWHIDEJANELA!==undefined&&process.env.SHOWHIDEJANELA==='true'?false:true);
 const SHOWDUMPIO=(process.env.SHOWDUMPIO!==undefined&&process.env.SHOWDUMPIO==='true'?true:false);
 
+const USERDATA_PROFILE=(process.env.USERDATA_PROFILE!==undefined&&process.env.USERDATA_PROFILE!==''?process.env.USERDATA_PROFILE:'');
 
 
+
+const PathToExtension='D:/xampp/htdocs-hostnames/santanseder/nodepu/extensao/ohjocgmpmlfahafbipehkhbaacoemojp/1.2.4_0';
 
 
 
@@ -58,7 +77,7 @@ const SHOWDUMPIO=(process.env.SHOWDUMPIO!==undefined&&process.env.SHOWDUMPIO==='
  * @param AgentUSER 
  * @returns 
  */
-export async function CriarPUU(PU, DATAPROXY, AgentUSER){
+export async function CriarPUU(PU, DATAPROXY, AgentUSER, Profile=''){
 	if(PU.page!==undefined){
 		await Destroi(PU);
 	}
@@ -66,23 +85,23 @@ export async function CriarPUU(PU, DATAPROXY, AgentUSER){
     var outPU={}as any;// { page: any; browser: any; };
 	async function CriarPU(){
         //let PU= await FPuppeteer.Create(DATAPROXY.URLPROXIE, '') as any;
-		let cPULC= await Create(DATAPROXY.URLPROXIE, (DATAPROXY.URLPWD!==undefined&&DATAPROXY.URLPWD!==''?DATAPROXY.URLPWD:DATAPROXY.URLPWD)) as any;
+		let cPULC= await Create(DATAPROXY.URLPROXIE, (DATAPROXY.URLPWD!==undefined&&DATAPROXY.URLPWD!==''?DATAPROXY.URLPWD:DATAPROXY.URLPWD), Profile) as any;
         //if(PU) looger.consoleLog('PU...............!!.............',await PU);
         //if(cPULC.page) looger.consoleLog('PU.page..............!!.............',await cPULC.page);
         //if(PU.browser) looger.consoleLog('PU.browser..............!!.............',await PU.browser);
 
 		if(cPULC!==undefined&&cPULC.page!==undefined){
-			looger.consoleLog('CONFIGURAR  APP.............');
+			looger.consoleLog('CONFIGURAR  APP.............', Profile);
             await Configurar(cPULC.page,  AgentUSER);
 			return cPULC;
 		}
         
         
-        looger.consoleLog('ERRO AO CRIAR APP.............',await cPULC);
+        looger.consoleLog('ERRO AO CRIAR APP.............',Profile,await cPULC);
         return false;
 
     }/**/
-    looger.consoleLog('CRIAR APP.............');
+    //looger.consoleLog('CRIAR APP.............');
     outPU = await CriarPU();
     
     if(outPU===false||outPU.page===undefined){
@@ -103,18 +122,28 @@ export async function CriarPUU(PU, DATAPROXY, AgentUSER){
  * @param Proxy_password 
  * @returns 
  */
-  async function Create( URLProxy_PORT, ProxyPWD, define=''){ //Proxy_username, Proxy_password
+  async function Create( URLProxy_PORT, ProxyPWD, profile=''){ //Proxy_username, Proxy_password
 	//console.timeLog('TESTE', URLProxy_PORT);
-	looger.consoleLog('PROXy',{PROXY_PORT: URLProxy_PORT, PROXY_PWD: ProxyPWD});
+	looger.consoleLog('PROXy',{PROXY_PORT: URLProxy_PORT, PROXY_PWD: ProxyPWD}, profile);
 	
-
-	// ./snap/chromium/2042/bin/chromium
-	// /root@srv-sms:~# find / -name chromium
-	// /root/snap/chromium
+	/* find / -iname chromium*
+	 ./snap/chromium/2042/bin/chromium
+	 /root@srv-sms:~# find / -name chromium
+	 /root/snap/chromium
+	 /etc/chromium-browser
+	 /usr/lib/chromium-browser
+	 /usr/share/chromium-browser
+	 /usr/bin/chromium-browser
+	 
+	*/
 	const LOCALBROWSERso={
 		'linux':'/snap/bin/chromium', 										//linux debian
 		'centos':'/usr/bin/chromium-browser',
-		'windows':'C:/Program Files/Google/Chrome/Application/chrome.exe',	//windows
+		//'windows':(define=='edge'?'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe':'C:/Program Files/Google/Chrome/Application/chrome.exe'),
+		//'windows':'C:/Users/Admin01/AppData/Local/Programs/Opera/launcher.exe' //windows - opera : erro
+		//'windows':'C:/Program Files/Google/Chrome/Application/chrome.exe',	//windows - chrome
+		//'windows':'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'	//windows - msedge
+		'windows':'D:/xampp/htdocs-hostnames/chromedriver/chrome-win/chrome.exe',
 	};
 
 	let start_proxyes= (URLProxy_PORT!=''&&URLProxy_PORT!==false&&URLProxy_PORT!==undefined&&URLProxy_PORT!==null)?true:false;
@@ -127,7 +156,7 @@ export async function CriarPUU(PU, DATAPROXY, AgentUSER){
 	}else ProxyPWD='';
 	//&&Proxy_username!=''&&Proxy_password!=''
     //console.log('start_proxyes',start_proxyes,URLProxy_PORT);
-	await looger.consoleLog({URLProxy_PORT});
+	looger.consoleLog({URLProxy_PORT},{ProxyPWD});
 
 	//URLPROXIE: 'http://primo10-zone-resi-region-br:302515@pr.pyproxy.com:16666',
 	//URLProxy_PORT='http://pr.pyproxy.com:16666';
@@ -139,6 +168,7 @@ export async function CriarPUU(PU, DATAPROXY, AgentUSER){
 	LCBROWSER=LOCALBROWSERso['windows'];
 	else
 	LCBROWSER=LOCALBROWSERso['linux'];
+	//looger.consoleLog({LCBROWSER});
 
 	/*
 	if(define==='ClusTER'){
@@ -146,7 +176,6 @@ export async function CriarPUU(PU, DATAPROXY, AgentUSER){
 	}
 	else{
 		*/
-
 
 		let i=0;
 		/*/while (i < LOCALBROWSERs.length) {*/
@@ -156,14 +185,29 @@ export async function CriarPUU(PU, DATAPROXY, AgentUSER){
 					.launch({
 						dumpio: SHOWDUMPIO,                   //** Mostra DevTools listening  */
 						headless: SHOWHIDEJANELA,
-
-						ignoreDefaultArgs: ["--disable-extensions"],
+						
+						ignoreDefaultArgs: [
+							"--disable-extensions",
+							'--disable-dev-shm-usage',
+						],
+						
 						ignoreHTTPSErrors: true,
 						devtools: false,
 						executablePath: LCBROWSER, //LOCALBROWSERs[i],
-						//userDataDir: "./outbrowser/user_data2",
+						//userDataDir: USERDATA_PROFILE,
+
+						//C:\Users\Admin01\AppData\Local\Temp\puppeteer_dev_profile-Gb5kpj\Default
+						//userDataDir: 'D:\\xampp\\htdocs-hostnames\\santanseder\\nodepu\\PUProfile\\puppeteer_dev_profile-'+(profile!=''?profile:'User000'),
+
 						args: [
+							//'--profile-directory='+(profile!=''?profile:'Default'),
+							//'--user-data-dir='+USERDATA_PROFILE,
+
+							//'--disable-extensions-except='+PathToExtension,
+      						//'--load-extension='+PathToExtension,
+							
 							(start_proxyes===true) ? '--proxy-server='+ URLProxy_PORT : '',
+							(SHOWHIDEJANELA===false?'':'--single-process'),  //ErrorEvent WebSocket
 							//'--start-maximized',
 							'--window-size='+TAMANHOJNW+','+TAMANHOJNH,
 							'--window-position='+MOVEJN+','+MOVETOPJN,
@@ -171,28 +215,85 @@ export async function CriarPUU(PU, DATAPROXY, AgentUSER){
 							'--disable-setuid-sandbox',
 							'--disable-web-security',
 							'--disable-features=IsolateOrigins,site-per-process',
-
 							"--disable-gpu",
-							'--disable-dev-shm-usage',
 							'--no-first-run',
 							'--no-zygote',
-							(SHOWHIDEJANELA===false?'':'--single-process'),  //ErrorEvent WebSocket
 							'--use-gl=egl',
-							//'--profile-directory=./outbrowser/profile'
+							//"--enable-automation",
 
 
+							/*-ERRO-RESOLUCAO=> Error: We either navigate top level or have old version of the navigated frame 
+								Erro surgi por usar anúncios e análises do Google envolvendo iframes de forma a acionar atualizações.
+								entao adicionamos arg=--disable-site-isolation-trials como gambiarra 
+								e removemos arg=--disable-dev-shm-usage
+							-*/
+							'--disable-site-isolation-trials',
+							//'--disable-dev-shm-usage',
+							
+							//'--disk-cache-dir',
+							//'--media-cache-size=0',
+							//'--disk-cache-size=0',
+
+							'--disable-background-timer-throttling',
+  							'--disable-client-side-phishing-detection',
+  							//'--disable-default-apps',
+  							//'--disable-extensions',
+  							'--disable-hang-monitor',
+  							//'--disable-popup-blocking',
+
+							
+							//'--profile-directory=none',
+							//'--user-data-dir',
+							//'--user-data-dir=C:/Users/[USERNAME]/AppData/Local/Google/Chrome/User Data',
+							//'--user-data-dir=./profile',
+							
+							//'--user-data-dir=User002',
+
+							
+							//'--user-data-dir=/user/data/directory/profile_n'
+							//'--profile-directory=D:\\xampp\\htdocs-hostnames\\santanseder\\nodepu\\profile\\',
+							//https://chrome.google.com/webstore/detail/hideme-proxy/ohjocgmpmlfahafbipehkhbaacoemojp
+
+
+							//'--incognito',
+
+							
 						],
 						//slowMo: 200
 					})
 					.then(async browser => {
+						
+						/**-/
+						const backgroundPageTarget = await browser.waitForTarget(
+							target => target.type() === 'background_page'
+						);
+						console.log({backgroundPageTarget});
+						const backgroundPage = await backgroundPageTarget.page();
+						console.log({backgroundPage});
+						/**/
+
+						//const targets = await browser.targets();
+						//console.log({targets});
+//
+						//const extensionName = 'hide.me Proxy';
+						
+						/**-/const extensionTarget = targets.find(({ _targetInfo }) => {
+							return _targetInfo.title === extensionName && _targetInfo.type === 'background_page';
+						});/**/
+
 						//console.log('BROWSER')
+						//looger.consoleLog(browser, 'newpage');
 						const page = await browser.newPage();
+						
+
+						//await page.emulateMedia("screen");
+						//looger.consoleLog({page});
 
 						//await GotoContents(browser);
 
 						//console.log('BROWSER1')
 
-						if(start_proxyes && ProxyPWD!=''){
+						if(start_proxyes && ProxyPWD!='' && ProxyPWD!==undefined){
 							//{ ProxyPWD: [ 'http', '//primo10-zone-resi-region-br', '302515' ] }
 							if(ProxyPWD.includes('http')){
 								ProxyPWD= ProxyPWD.substring(ProxyPWD.indexOf('//')+2);	
@@ -206,12 +307,16 @@ export async function CriarPUU(PU, DATAPROXY, AgentUSER){
 
 						//console.log('BROWSER2')
 					
-						return {'page':page, 'browser':browser, 'Puppeteer': puppeteer};
+						//looger.consoleLog('OUT-THEN-Create');
+						return {'page':page, 'browser':browser, 'Puppeteer': puppeteer, 'Client': await page.target().createCDPSession()};
 					});
 				//break;
 			}catch(e){
-				console.log('ERROR#Create:',e)
+				console.log('ERROR#Create:',e);
+				//ERROR#Create: Error: Failed to launch the browser process!
 			}
+
+			//looger.consoleLog('OUT-Create');
 
 		/*/i++;}*/
   	/*}*/
@@ -265,6 +370,12 @@ async function setWindowSize(page, width, height) {
 	}
 }
 
+async function backgroundPageTarget(browser){
+	const backgroundPageTarget = await browser.waitForTarget(
+    	target => target.type() === 'background_page'
+  	);
+  	const backgroundPage = await backgroundPageTarget.page();
+}
 
 export async function GotoContents(Pagina){
 	console.log(Pagina.browserContexts().length);
@@ -288,12 +399,17 @@ export async function GotoContents(Pagina){
  */
  export async function GotoPagina(page, URLURI, timeout=240000){
 	try {
-		let response = await page.goto(URLURI ,{waitUntil: 'load', 'timeout': timeout });
-		try{console.log(await response);}catch(e){console.log('ERRO-GOTO:',e);}
-		return response;
+		//waitUntil: ["load", "domcontentloaded", "networkidle2", "networkidle0"]
+		let response = await page.goto(URLURI ,{waitUntil: ["load", "domcontentloaded"], 'timeout': timeout });
+		await AppFunc.wsleep(1000);
+		try{console.log(await response);}catch(e){
+			console.log('ERRO-GOTO:',e);
+			return {success:response, message: e};			
+		}
+		return {success:response, message: '_OK_'};
 	} catch (error) {
 		//console.log('ERROR-GOTO-PAGINA:',error);
-		return false;
+		return {success:false, message: error.toString() };
 	}
 }
 
@@ -302,9 +418,12 @@ export async function GotoContents(Pagina){
  * @param page 
  * @param namefile 
  */  
-  async function ScreenShot(page, namefile){
-  	await page.screenshot({ path: 'ScreenShot_'+namefile+'.png', fullPage: true })
-  }
+export async function ScreenShot(page, namefile){
+	try{
+		await page.screenshot({ path: namefile+'.png', fullPage: true });
+		await looger.consoleINFO('SCREENShot-file:',namefile+'.png');
+	}catch(e){console.log('ERROR:#-ScreenShot',e)}
+}
 /**
  * 
  * @param page 
@@ -377,12 +496,12 @@ async function DestroiP(page){
  */
 export async function executeJavaScript(page, CodeJS){
 	try{
-		let R= await page.evaluate(CodeJS);
-		await looger.consoleINFO('EXEC-JS:',await R);
+		let R= await page.evaluate((CodeJS)=>{CodeJS},CodeJS);
+		await looger.consoleINFO('EXEC-JS:',await R, CodeJS);
 		//console.log('EXEC-JS:',await R);
 		return await R;
 	}catch(e){
-		await looger.consoleINFO('ERROR#FUNCTION-executeJavaScript:',e);
+		await looger.consoleINFO('ERROR#FUNCTION-executeJavaScript:',e, CodeJS);
 		//console.log('ERROR#FUNCTION-executeJavaScript:',e);
 		return false;
 	}
@@ -401,6 +520,13 @@ export async function CLEAR_input(page,selector){
 	try{await page.$eval(selector, el => el.value = '');}catch(e){}}}}}
 }
 
+
+export async function getHtmlObj(page){
+	try {
+		let html = await page.content()
+		return await cheerio.load(html);	
+	} catch (error) {return false;}
+}
 
 /**
  * 
@@ -457,6 +583,9 @@ export async function SelectValue(page, Selector, optionValue){
 	}catch(e){return false}
 }
 
+
+
+
 /**
  * 
  *-/
@@ -478,10 +607,13 @@ export async function SelectValue(page, Selector, optionValue){
 	});
 }/**/
 
+async function SaveBufferEvent(){
+
+}
 /**
  * 
  * @param page 
- * @param onEvent 
+ * @param onEvent - requestfinished - close - dialog - requestfailed - worker - request - console - workercreated - 
  * @param oFunction 
  */
 export async function Events_ON(page, onEvent, oFunction){
@@ -518,7 +650,7 @@ async function WaitAllIMG(page){
  * @param page 
  * @returns 
  */
-async function WaitLoadPage(page){
+export async function WaitLoadPage(page){
 	return page.waitForNavigation({ waitUntil: 'domcontentloaded' }) //networkidle2//networkidle0//domcontentloaded//load
     //await navigationPromise1;
     //await page.waitForResponse(response => response.status() === 200)
@@ -557,9 +689,14 @@ export async function WAITLoopB(page, ObjAR:Array<any>, TimeMAX=5){
 				try {//await FPuppeteer.WaitLoadEnd(page, ObjAR[LOOPWhile1], 10);
 					//console.log('ELEMENT-LOOP-B:',element)
 					let SL= await page.waitForSelector(element, {timeout: 10});
-					//console.log('SL:',SL.page.content())
+					//console.log('SL:',SL);//.page.content()
 					return {result:true, posElement: index, NmElement: element, Obj: SL};
-    	    	} catch (error) {}
+    	    	} catch (error) {
+					if(error.toString().indexOf('Session closed')>-1){
+						return {result:false, posElement: -1, NmElement: 'Session_closed', Obj: undefined};
+					}else if(error.toString().indexOf('TimeoutError: waiting for selector')>-1){}
+					else console.log( {'x-ERROR-WAITLoopB':error.toString()});
+				}
 			}
 
     	    //LOOPWhile1++;
@@ -718,12 +855,25 @@ export async function GetSrcObjHtml(page, selector){
 	}catch(e){return false;}
 }
 
-export async function GetTextObjHTML(page, selector){
+export async function GetTextObjHTML(page, selector, ret=false){
 try{	
-	return await page.evaluate((selector: string) => {
+	return await page.evaluate((selector: string, ret) => {
 		//return document.querySelector(selector).textContent;
+		if(ret==true){
+			//let RR=document.querySelector(selector).textContent.replace(/\t/g,'').replace(/\n/g,'').trim();
+			let RR=(<HTMLElement>document.querySelector(selector)).innerText.replace(/\t/g,'').replace(/\n/g,'').trim();
+			RR=RR.replace('\\r\\n','@##@');
+			RR=RR.replace('\\n','@##@');
+			RR=RR.replace('\\r','@##@');
+			RR=RR.replace('\\t','@##@');
+			RR=RR.replace('\r\n','@##@');
+			RR=RR.replace('\n','@##@');
+			RR=RR.replace('\r','@##@');
+			RR=RR.replace('\t','@##@');
+			return RR;
+		}else
 		return document.querySelector(selector).textContent.replace(/\t/g,'').replace(/\n/g,'').trim();
-	},selector);
+	},selector, ret);
 }catch(e){return false;}
 }
 export async function GetValueObjInput(page, selector){
@@ -751,6 +901,12 @@ export async function setValueInputB(page, selector, value: string | number) {
 }
 
 
+export async function setFocus(page, selector){
+	try{
+		await page.focus(selector);
+		return true;
+	}catch(e){return false;}
+}
 
 /*-***--*iFrames*-*/
 //src="corpo.php?src=consulta/index.php"
@@ -897,6 +1053,7 @@ export async function getAllCookie(page){
 		const all_browser_cookies = (await client.send('Network.getAllCookies')).cookies;
 		const current_url_cookies = await page.cookies();
 		const third_party_cookies = all_browser_cookies.filter(cookie => cookie.domain !== current_url_cookies[0].domain);
+		await client.detach();
 
 		//console.log(all_browser_cookies); // All Browser Cookies
 		//console.log(current_url_cookies); // Current URL Cookies
@@ -937,6 +1094,70 @@ export async function iNjectCookie(page, iCookie){
 	}catch(e){return false}
 }
 
+/**
+ * 
+ * @param page 
+ * @param selector 
+ * @returns 
+ */
+export async function Wait_ForNotDisabled(page, selector){
+	await page.waitForSelector(selector+':not([disabled])');
+}
+export async function check_isdisabledB(page, Selector, classDisabled){
+	await page.waitForSelector(Selector); 
+	const isDiabled = await page.evaluate((selector: string, classDisabled) => {
+		if(document
+        .querySelector(selector)
+        .classList.contains(classDisabled)){
+			return true;
+		}
+		else
+		if(document.querySelector(selector).hasAttribute("disabled")){
+			return true;
+		}
+		else
+		return false;
+
+	},Selector, classDisabled);
+	console.log('check_disabledB', isDiabled);
+	return isDiabled;
+}
+
+
+export async function GetUrl(page){
+	try{return await page.url();}catch(e){console.log('GET_URL-ERRO:',e); return false;}
+}
+export async function CompareUrl(page, Url){
+	try{if(Url == await page.url()) return true;}catch(e){console.log('GET_URL-ERRO:',e); return false;}
+}
+
+
+/**-/
+export async function VideoRecordPU(page){
+	//let cColor='black' || '#35A5FF';
+	const Config = {
+		followNewTab: true,
+		fps: 25,
+		ffmpeg_Path: '<path of ffmpeg_path>' || null,
+		videoFrame: {
+		  width: 1024,
+		  height: 768,
+		},
+		videoCrf: 18,
+		videoCodec: 'libx264',
+		videoPreset: 'ultrafast',
+		videoBitrate: 1000,
+		autopad: {
+		  color: 'black' || '#35A5FF',
+		},
+		aspectRatio: '4:3',
+	};
+
+	return new PuppeteerScreenRecorder(page, Config);
+	//await recorder.start(outvideopath);
+	//await recorder.stop();
+}
+/**/
 
 
 /*-Export-*-/
