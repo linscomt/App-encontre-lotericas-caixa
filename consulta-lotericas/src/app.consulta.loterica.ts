@@ -75,13 +75,14 @@ async function LTcx_SelectLOTERICA(page){
     return false;
     
 }
+
 async function LTcx_Select01(page, id_value){
 //<option selected="selected" value="6">Correspondentes CAIXA Aqui</option>
 
 	let selectOptionLT='div[class="form form-d form-vertical"] div[class="select-button"] select[name="ctl00$ctl59$g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036$ddlTipo"][id="ctl00_ctl59_g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036_ddlTipo"]';
 	try{
         await page.select(selectOptionLT, id_value);
-        await looger.consoleEINFO('SELECIONOU LOTERICA');
+        await looger.consoleEINFO('SELECIONOU ', id_value);
         return true;
     }catch(e){}
     return false;
