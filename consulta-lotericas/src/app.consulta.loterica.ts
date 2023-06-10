@@ -10,7 +10,7 @@ import Looger from '../modulos/appMod/looger.out';const looger= new Looger('App 
 import * as FPuppeteer from '../modulos/appPU/f.puppeteer';
 import Urls from "../urls.json";
 
-import {OutListaF1,OutListaF2,TEmpMemCD, FL_PsJAFOI, FL_JAFOI} from './app.const';
+import {OutListaA1,OutListaA2,OutListaF1,OutListaF2,TEmpMemCD, FL_PsJAFOI, FL_JAFOI} from './app.const';
 
 
 async function LaodingPG(page){
@@ -74,6 +74,17 @@ async function LTcx_SelectLOTERICA(page){
     }catch(e){}
     return false;
     
+}
+async function LTcx_Select01(page, id_value){
+//<option selected="selected" value="6">Correspondentes CAIXA Aqui</option>
+
+	let selectOptionLT='div[class="form form-d form-vertical"] div[class="select-button"] select[name="ctl00$ctl59$g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036$ddlTipo"][id="ctl00_ctl59_g_7fcd6a4b_5583_4b25_b2c4_004b6fef4036_ddlTipo"]';
+	try{
+        await page.select(selectOptionLT, id_value);
+        await looger.consoleEINFO('SELECIONOU LOTERICA');
+        return true;
+    }catch(e){}
+    return false;
 }
 
 async function LTcx_SelectESTADO(page,ESt, sName=''){
@@ -236,7 +247,6 @@ async function LTcx_VerMaisLotericas(page){
     else return false;
 }
 
-
 async function LTcx_ListarLotericas(page){
     //<ul class="no-bullets founded"> 
     //<li class="indice-letter-group">
@@ -261,7 +271,7 @@ async function LTcx_ListarLotericas(page){
             Listas=L.split('<li class="indice-letter-group">');
         }
 
-        await looger.consoleINFO_OK('LTcx_ListarLotericas -OK');
+        await looger.consoleINFO_OK('Func LTcx_ListarLotericas -OK');
     }catch(e){}
     
 
@@ -269,17 +279,17 @@ async function LTcx_ListarLotericas(page){
 }
 
 async function LTcx_SalvarLista(L, E, C){
-return new Promise(async resolve => {
-    console.log('--IN-LTcx_SalvarLista-----');
-
-    for (let index = 0; index < L.length; index++) {
-        const element = L[index];
-        if(element!='') await LTcx_SalvarLotericas(element, E, C);
-    }
-
-    console.log('--OUT-LTcx_SalvarLista-----');
-    resolve(true);
-});
+	return new Promise(async resolve => {
+		console.log('--IN-LTcx_SalvarLista-----');
+	
+		for (let index = 0; index < L.length; index++) {
+			const element = L[index];
+			if(element!='') await LTcx_SalvarLotericas(element, E, C);
+		}
+	
+		console.log('--OUT-LTcx_SalvarLista-----');
+		resolve(true);
+	});
 }
 
 async function LTcx_SalvarLotericas(data, E, C){
@@ -321,6 +331,10 @@ async function LTcx_SalvarLotericas(data, E, C){
     await write_file(OutListaF1 +E+'.txt', 
         FMT+"\n---------------------------------------------------$\n"
     );
+    await write_file(OutListaA1 +'.txt', 
+        FMT+"\n---------------------------------------------------$\n"
+    );
+
 
     //await write_file(OutListaF1 +E+'C'+C+'.txt', 
     //    FMT+"\n---------------------------------------------------\n"
@@ -328,6 +342,9 @@ async function LTcx_SalvarLotericas(data, E, C){
 
     FMT=FMT.replace(/\n/g,'|');
     await write_file(OutListaF2 +E+'.txt', 
+       FMT+"\n"
+    );
+	await write_file(OutListaA2 +'.txt', 
        FMT+"\n"
     );
 
@@ -352,6 +369,10 @@ async function NenhumPonto(page){
 
 export async function ConsultarLT(ESt, iPs){
 return new Promise(async resolve => {
+
+	const SELECTORG=(process.env.SELECT_ORG!==''&&process.env.SELECT_ORG!==undefined?process.env.SELECT_ORG:'2');
+	
+	
     let V_C=await read_file(TEmpMemCD+ESt+'.log')as any;//V|C
     if(V_C==false) V_C='0';
     await write_fileA(TEmpMemCD+ESt+'.log', '0');
@@ -382,7 +403,7 @@ return new Promise(async resolve => {
         if(CPG >10){resolve({result:false, ESt, iPs, s_message:'#NAOCARREGOU#'});return;}
         CPG++;
         await looger.consoleEINFO('NAO CARREGOU', CPG);
-        await Funcoes.wsleep(1000);
+        await Funcoes.wsleep(500);
     }
     
 
@@ -390,7 +411,8 @@ return new Promise(async resolve => {
     /**/
 
     /*--*/
-    await LTcx_SelectLOTERICA(PU.page);
+    //await LTcx_SelectLOTERICA(PU.page);
+	await LTcx_Select01(PU.page, SELECTORG);
     /*--*/
 
     /*-SRC HTml-*-/
@@ -466,7 +488,7 @@ return new Promise(async resolve => {
                     }
                     await looger.consoleINFO('NO LISTA', element.value, V_C);
                     if(await NenhumPonto(PU.page)===true)break;
-                    await Funcoes.wsleep(1000);
+                    await Funcoes.wsleep(500);
                 }
 
 
